@@ -6,8 +6,8 @@
 
 #include <Adafruit_NeoPixel.h>
 
-#define NEOPIXEL_PIN 14 // NeoPixels are connected to this pin
-#define NUM_LEDS    16 // Number of NeoPixels
+#define NEOPIXEL_PIN 14 // Default 14 NeoPixels are connected to this pin
+#define NUM_LEDS    24 // Number of NeoPixels
 #define FPS         50 // Animation frame rate (frames per second)
 
 Adafruit_NeoPixel leds(NUM_LEDS, NEOPIXEL_PIN, NEO_GRB + NEO_KHZ800);
@@ -388,5 +388,3 @@ const uint8_t gamma8[] PROGMEM = {
   144,146,148,150,152,154,156,158,160,162,164,167,169,171,173,175,
   177,180,182,184,186,189,191,193,196,198,200,203,205,208,210,213,
   215,218,220,223,225,228,231,233,236,239,241,244,247,249,252,255 };
-
-
