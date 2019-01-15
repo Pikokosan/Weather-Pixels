@@ -18,7 +18,7 @@ void renderFrame(void);
 // YOUR VARIABLES ARE BELOW
 const char* ssid     = "YOURSSID"; // Your Wifi SSID
 const char* password = "YOURPASSWORD"; // Your Wifi password
-const char *APIkey = "YOURAPIKEY"; // Your Openweather API key. Subscribe at https://openweathermap.org/appid
+const char* APIkey = "YOURAPIKEY"; // Your Openweather API key. Subscribe at https://openweathermap.org/appid
 int8_t utc_offset = -2; // hours off of UTC, e.g. EST is -5
 const char* location = "Amsterdam,NL"; // Your city,countrycode , e.g. Amsterdam,NL
 // YOUR VARIABLES ARE ABOVE. Dont forget edit the animation.cpp file
