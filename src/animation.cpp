@@ -3,14 +3,19 @@
 // real-world units...see comments for explanation of what's needed.
 
 // NeoPixel stuff ----------------------------------------------------------
+#include "definitions.h"
 
 #include <Adafruit_NeoPixel.h>
 
-#define NEOPIXEL_PIN 14 // Default 14 NeoPixels are connected to this pin
-#define NUM_LEDS    24 // Number of NeoPixels
-#define FPS         50 // Animation frame rate (frames per second)
 
-Adafruit_NeoPixel leds(NUM_LEDS, NEOPIXEL_PIN, NEO_GRB + NEO_KHZ800);
+
+
+#ifdef ENABLE_RGBW
+  Adafruit_NeoPixel leds(NUM_LEDS, NEOPIXEL_PIN, NEO_GRBW + NEO_KHZ800);
+#else
+  Adafruit_NeoPixel leds(NUM_LEDS, NEOPIXEL_PIN, NEO_GRB + NEO_KHZ800);
+#endif
+
 
 // Animation control stuff -------------------------------------------------
 
@@ -30,6 +35,7 @@ uint16_t sunCenter   = 0,       // Position of 'sun' in 16-bit sky
 uint8_t lightningBrightness = 0;
 uint8_t lightningIntensity  = 0;
 uint8_t snowIntensity       = 0;
+//uint8_t dayLight            = 0;
 
 uint32_t cloudBits   = 0;       // Bitmask of clouds
 #if NUM_LEDS < 32
@@ -77,7 +83,7 @@ extern const uint8_t gamma8[]; // Big table at end of this code
 void animSetup(void) {
 
   leds.begin();
-  leds.setBrightness(200);
+  leds.setBrightness(BRIGHTNESS);
   leds.clear(); // All NeoPixels off ASAP
   leds.show();
 
@@ -123,6 +129,7 @@ void animConfig(
   windSpeed          = w;
   lightningIntensity = l;
   snowIntensity      = s;
+  //dayLight           = map(timeOfDay,0,65535,0,255);
 
   // Randomize cloud bitmask based on cloud cover percentage:
   cloudBits = 0;
@@ -182,16 +189,7 @@ void waitForFrame(void) {
   timeOfLastFrame = t;
 }
 
-#define NIGHTSKYCLEAR   0x0a1923
-#define DAYSKYCLEAR     0x28648c
-#define NIGHTSKYCLOUDBG 0x2c2425
-#define DAYSKYCLOUDBG   0x5e6065
-#define NIGHTSKYCLOUDFG 0x515159
-#define DAYSKYCLOUDFG   0xc2c2c2
-#define NIGHTSNOW       0xa6b1c0
-#define DAYSNOW         0xffffff
-#define SUNCLEAR        0xffff60
-#define SUNCLOUDY       0x7a7a61
+
 
 void renderFrame(void) {
   // Display *prior* frame of data at start of function --
@@ -215,6 +213,7 @@ void renderFrame(void) {
   if(y > 32767) y = 65536 - y;
   y = y * 256L / 4096 - 896;
   dayWeight = (y > 255) ? 255 : ((y < 0) ? 0 : y); // 0-255 night/day
+  //uint8_t sunrise =map(dayWeight, 200, 255, 0, 255);
 
   // Determine sky and cloud color based on % of cloud cover
   uint32_t
@@ -238,6 +237,7 @@ void renderFrame(void) {
     }
     overlay(255, 255, 255);
   } else {
+
     sunRadius = map(dayWeight, 128, 255, 1, 8192);
     uint16_t x;
     int16_t px1, px2, sx1, sx2;
@@ -272,8 +272,9 @@ void renderFrame(void) {
         }
       }
     }
-    
-    overlay(sunColor); // Composite sun atop sky
+
+    //overlay(sunColor); // Composite sun atop sky
+
   }
 
   if(cloudBits) {
@@ -360,12 +361,23 @@ void renderFrame(void) {
 
 //  timeOfDay += 65536/60/FPS; // 1 min for day/night cycle
 
+
   // Convert RGB renderbuf to gamma-corrected LED-native color order:
   for(uint16_t i=0; i<NUM_LEDS; i++) {
+    #ifdef ENABLE_RGBW
+    //uses the dayWeight value to bring up the white led's
+
+    leds.setPixelColor(i,
+      pgm_read_byte(&gamma8[renderBuf[i][0]]),
+      pgm_read_byte(&gamma8[renderBuf[i][1]]),
+      pgm_read_byte(&gamma8[renderBuf[i][2]]),
+      dayWeight);
+    #else
     leds.setPixelColor(i,
       pgm_read_byte(&gamma8[renderBuf[i][0]]),
       pgm_read_byte(&gamma8[renderBuf[i][1]]),
       pgm_read_byte(&gamma8[renderBuf[i][2]]));
+    #endif
   }
   // DON'T call leds.show() here! That's done at start of function.
 }
